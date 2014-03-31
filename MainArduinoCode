@@ -1,16 +1,119 @@
 # include <Servo.h>
 # include <NewPing.h>
 
-void setup ()   
-{
-  
+// Motor Pins
+int motor_left = 3;
+int motor_right = 4;
+
+// Reverse Motor Pins
+int rev_motor_left = 5; 
+int rev_motor_right = 6;
+
+boolean automatic = false;
+
+void setup() {
+  pinMode(motor_left, OUTPUT);
+  pinMode(motor_right, OUTPUT);
+  pinMode(rev_motor_left, OUTPUT);
+  pinMode(rev_motor_right, OUTPUT);
+  Serial.begin(9600);
 }
 
-void loop ()
-{
+void loop() {
+  // parse instructions
+  String instruction = Serial.readString();
+  if (!Serial.available())
+    delay(70);
+  else if (instruction.equals("automatic"))
+    automatic = true;
+  else if (instruction.equals("manual"))
+    automatic = false;
+  else  {
+    boolean successful = automatic ? justin(instruction) : drive(instruction);
+    if (successful)
+      Serial.println("Successfully received instruction: " + instruction);
+    else
+      Serial.println("Could not parse instruction: " + instruction);
+  }
 }
 
-public void scan ()
-{
-  
+/*********************************************************************************************************************************
+*                                                            MOVEMENT                                                            *
+*********************************************************************************************************************************/
+
+// Given a command, the robot moves according to command contents (manual mode)
+boolean drive(String command)  {
+  if (command == "forward")
+    moveForward();
+  else if (command == "reverse")
+    moveBackwards();
+  else if (command == "turn left")
+    turnLeft();
+  else if (command == "turn right")
+    turnRight();
+  else if (command == "spin cw")
+    spinClockwise();
+  else if (command == "spin ccw")
+    spinCounterClockwise();
+  else if (command == "stop")
+    roboStop();
+  else
+    return false;
+  return true;
 }
+
+void moveForward()  { 
+  digitalWrite(rev_motor_left, LOW);
+  digitalWrite(rev_motor_right, LOW);
+  digitalWrite(motor_left, HIGH);
+  digitalWrite(motor_right, HIGH);
+}
+
+void moveBackwards()  { 
+  digitalWrite(motor_left, LOW);
+  digitalWrite(motor_right, LOW);
+  digitalWrite(rev_motor_left, HIGH);
+  digitalWrite(rev_motor_right, HIGH);
+}
+
+void roboStop()  { 
+  digitalWrite(motor_left, LOW);
+  digitalWrite(motor_right, LOW);
+  digitalWrite(rev_motor_left, LOW);
+  digitalWrite(rev_motor_right, LOW);
+}
+
+void turnLeft()  { 
+  digitalWrite(motor_left, LOW);
+  digitalWrite(motor_right, HIGH);
+  digitalWrite(rev_motor_left, HIGH);
+  digitalWrite(rev_motor_right, LOW);
+  delay(300);
+  digitalWrite(motor_right, LOW);
+  digitalWrite(rev_motor_left, LOW);
+}
+
+void turnRight()  { 
+  digitalWrite(motor_left, HIGH);
+  digitalWrite(motor_right, LOW);
+  digitalWrite(rev_motor_left, LOW);
+  digitalWrite(rev_motor_right, HIGH);
+  delay(300);
+  digitalWrite(rev_motor_right, LOW);
+  digitalWrite(motor_left, LOW);
+}
+
+void spinCounterClockwise()  {
+  digitalWrite(motor_left, LOW);
+  digitalWrite(motor_right, HIGH);
+  digitalWrite(rev_motor_left, HIGH);
+  digitalWrite(rev_motor_right, LOW);
+}
+
+void spinClockwise()  {
+  digitalWrite(motor_left, HIGH);
+  digitalWrite(motor_right, LOW);
+  digitalWrite(rev_motor_left, LOW);
+  digitalWrite(rev_motor_right, HIGH);
+}
+
