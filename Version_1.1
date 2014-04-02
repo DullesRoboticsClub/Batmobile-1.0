@@ -2,8 +2,6 @@
 # include <Servo.h>
 # include <NewPing.h>
 
-
-
 boolean automatic = false;
 const int steps = 64;
 Servo myServo;
@@ -44,15 +42,33 @@ void justin()
   if(ultra.pingcm()<30)
   {
     drive("forward");
-    return
+    return;
   }
-  Servo.write(90);
+  Servo.write(0);
   if(ultra.pingcm()<30)
   {
+    drive("turn right");
     drive("forward");
-    return
+    return;
   }
-  
+  Servo.write(180);
+  if(ultra.pingcm()<30)
+  {
+    drive("turn left");
+    drive("forward");
+    return;
+  }
+  digitalWrite(ledPin,1);
+  delay(100);
+  digitalWrite(ledPin,0);
+  delay(100);
+  digitalWrite(ledPin,1);
+  delay(100);
+  digitalWrite(ledPin,0);
+  delay(100);
+  digitalWrite(ledPin,1);
+  delay(100);
+  digitalWrite(ledPin,0);
 }
 
 
