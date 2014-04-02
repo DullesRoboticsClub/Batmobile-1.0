@@ -1,1 +1,116 @@
-#include <Stepper.h>
+# include <Stepper.h>
+# include <Servo.h>
+# include <NewPing.h>
+
+
+
+boolean automatic = false;
+const int steps = 64;
+Servo myServo;
+int ledPin = 13;
+
+void setup() {
+  Serial.begin(9600);
+  Stepper left (steps,2,3,4,5);
+  Stepper right (steps,6,7,8,9);
+  NewPing ultra (10,11,60);
+  myServo.attach(12);
+  left.setSpeed(60);
+  right.setSpeed(60);
+  pinMode(13,OUTPUT);
+}
+
+void loop() {
+  // parse instructions
+  String instruction = Serial.readString();
+  if (!Serial.available())
+    delay(70);
+  else if (instruction.equals("automatic"))
+    automatic = true;
+  else if (instruction.equals("manual"))
+    automatic = false;
+  else  {
+    boolean successful = automatic ? justin() : drive(instruction);
+    if (successful)
+      Serial.println("Successfully received instruction: " + instruction);
+    else
+      Serial.println("Could not parse instruction: " + instruction);
+  }
+}
+
+void justin()
+{
+  Servo.write(90);
+  if(ultra.pingcm()<30)
+  {
+    drive("forward");
+    return
+  }
+  Servo.write(90);
+  if(ultra.pingcm()<30)
+  {
+    drive("forward");
+    return
+  }
+  
+}
+
+
+/*********************************************************************************************************************************
+*                                                            MOVEMENT                                                            *
+*********************************************************************************************************************************/
+
+// Given a command, the robot moves according to command contents (manual mode)
+boolean drive(String command)  {
+  if (command == "forward")
+    moveForward();
+  else if (command == "reverse")
+    moveBackwards();
+  else if (command == "turn left")
+    turnLeft();
+  else if (command == "turn right")
+    turnRight();
+  else if (command == "spin cw")
+    spinClockwise();
+  else if (command == "spin ccw")
+    spinCounterClockwise();
+  else if (command == "stop")
+    roboStop();
+  else
+    return false;
+  return true;
+}
+
+void moveForward()  { 
+  left.step(steps);
+  right.step(steps);
+}
+
+void moveBackwards()  { 
+  left.step(-steps);
+  right.step(-steps);
+}
+
+void roboStop()  { 
+  delay(50);
+}
+
+void turnLeft()  { 
+  left.step(-steps/2);
+  right.step(steps/2);
+}
+
+void turnRight()  { 
+  left.step(steps/2);
+  right.step(-steps/2);
+}
+
+void spinCounterClockwise()  {
+  left.step(-3*steps);
+  right.step(3*steps);
+}
+
+void spinClockwise()  {
+  left.step(3*steps);
+  right.step(-3*steps);
+}
