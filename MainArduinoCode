@@ -1,6 +1,6 @@
 # include <Servo.h>
 # include <NewPing.h>
-//You have not been hacked or anything
+// You have not been hacked or anything
 // Motor Pins
 int motor_left = 3;
 int motor_right = 4;
