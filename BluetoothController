@@ -1,5 +1,30 @@
-public class OldBlue
+import processing.serial.*;
+Serial killer;
+final static int nr = 1;
+
+void setup(){
+  size(400,400);
+  String name = Serial.list()[nr];
+  killer = new Serial (this, name, 9600);
+  println("These are the following commands:" + "\n");
+  println("w --- FORWARD");
+  println("s --- REVERSE");
+  println("a --- TURN LEFT");
+  println("d --- TURN RIGHT");
+  println("q --- SPIN COUNTER COLOCKWISE");
+  println("e --- SPIN CLOCKWISE");
+}
+
+void draw ()
 {
-  public static void main (String [] args)
+  background(0,0,0);
+  switch (key)
   {
+    case 'w': killer.write("forward"); break;
+    case 'a': killer.write("reverse"); break;
+    case 's': killer.write("turn left"); break;
+    case 'd': killer.write("turn right"); break;
+    case 'q': killer.write("spin ccw"); break;
+    case 'e': killer.write("spin cw"); break;
+  }
 }
