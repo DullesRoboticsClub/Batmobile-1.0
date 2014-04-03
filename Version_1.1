@@ -1,17 +1,21 @@
-# include <Stepper.h>
-# include <Servo.h>
-# include <NewPing.h>
+#include <NewPing.h>
+
+#include <Servo.h>
+
+#include <Stepper.h>
 
 boolean automatic = false;
 const int steps = 64;
 Servo myServo;
 int ledPin = 13;
+Stepper left (steps,2,3,4,5);
+Stepper right (steps,6,7,8,9);
+NewPing ultra (10,11,60);
 
 void setup() {
   Serial.begin(9600);
-  Stepper left (steps,2,3,4,5);
-  Stepper right (steps,6,7,8,9);
-  NewPing ultra (10,11,60);
+
+
   myServo.attach(12);
   left.setSpeed(60);
   right.setSpeed(60);
@@ -21,6 +25,7 @@ void setup() {
 void loop() {
   // parse instructions
   String instruction = Serial.readString();
+ 
   if (!Serial.available())
     delay(70);
   else if (instruction.equals("automatic"))
@@ -28,35 +33,35 @@ void loop() {
   else if (instruction.equals("manual"))
     automatic = false;
   else  {
-    boolean successful = automatic ? justin() : drive(instruction);
+    boolean successful = automatic ? justin(instruction) : drive(instruction);
     if (successful)
-      Serial.println("Successfully received instruction: " + instruction);
+     Serial.println("Successfully received instruction: " + instruction);
     else
       Serial.println("Could not parse instruction: " + instruction);
   }
 }
-
-void justin()
+// boolean successful = automatic ? justin(instruction) : drive(instruction);
+boolean justin(String whocares)
 {
-  Servo.write(90);
-  if(ultra.pingcm()<30)
+  myServo.write(90);
+  if(ultra.ping_cm()<30)
   {
     drive("forward");
-    return;
+    return true;
   }
-  Servo.write(0);
-  if(ultra.pingcm()<30)
+  myServo.write(0);
+  if(ultra.ping_cm()<30)
   {
     drive("turn right");
     drive("forward");
-    return;
+    return true;
   }
-  Servo.write(180);
-  if(ultra.pingcm()<30)
+  myServo.write(180);
+  if(ultra.ping_cm()<30)
   {
     drive("turn left");
     drive("forward");
-    return;
+    return true;
   }
   digitalWrite(ledPin,1);
   delay(100);
@@ -69,9 +74,10 @@ void justin()
   digitalWrite(ledPin,1);
   delay(100);
   digitalWrite(ledPin,0);
+  return false;
 }
 
-
+// 
 /*********************************************************************************************************************************
 *                                                            MOVEMENT                                                            *
 *********************************************************************************************************************************/
